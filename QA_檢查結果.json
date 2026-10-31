@@ -1,0 +1,29 @@
+{
+  "version": "V12.5.5 local-only candidate",
+  "base": "V12.5.4 local candidate",
+  "base_sha256": "da764eac18d5d909c8cb6b4f3ef334474b0cbb7ac1b44a8bd18ae1f86a543da8",
+  "candidate_sha256": "3604dfb51e52f3033d3b4d7c992398e6d085c6ddc81e071ef81d5f7f4b5c57de",
+  "inline_js_scripts_checked": 15,
+  "inline_js_syntax_passed": 15,
+  "graph_nodes": 23,
+  "graph_edges": 24,
+  "graph_connected": true,
+  "feet_depth_order_test": "passed (59.5 < 66.0 < 66.2 < 73.7)",
+  "walking_animation_ground_contact": "removed upward translate from walk cycle",
+  "regression_presence_checks": {
+    "V12.1 school step": "schoolStep:0",
+    "V12.1 storm step": "stormStep:0",
+    "V12.1 storm safety": "不自行移動大型落枝",
+    "JSON backup": "JSON",
+    "east neighborhood": "v123Neighborhood",
+    "life graph": "__greenCityWalkGraph",
+    "npc": "resident_elder",
+    "planting": "種樹",
+    "local save": "localStorage.setItem"
+  },
+  "changes": "Only title, lifeDepth y range/precision, and footstep translate; no image, walk route, save schema or mission edits.",
+  "browser_and_mobile_interaction": "NOT TESTED",
+  "github_branch_or_pr": "NOT CREATED: main is still V8.1, sync prerequisite unmet",
+  "github_main_modified": false,
+  "github_pages_deployed": false
+}

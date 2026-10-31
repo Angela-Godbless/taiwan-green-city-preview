@@ -1,4 +1,4 @@
-<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#a9e0e0"><meta name="description" content="植感城市：臺灣樹木探索與城市綠化遊戲"><title>V12.3 無縫街區測試｜植感城市 V12.1｜園丁生活新故事</title><style>
+<!doctype html><html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#a9e0e0"><meta name="description" content="植感城市：臺灣樹木探索與城市綠化遊戲"><title>植感城市 V12.5.5｜人物深度與腳步貼地修正候選版（未部署）</title><style>
 :root{--ink:#224c3c;--navy:#1a4e63;--mint:#f5fff1;--blue:#eaf7ff;--gold:#f8c34d;--shadow:0 10px 29px rgba(16,57,50,.27);--edge:inset 0 2px 0 rgba(255,255,255,.76),0 4px 0 rgba(24,89,57,.1)}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden}body{font:16px/1.4 system-ui,-apple-system,"Noto Sans TC","PingFang TC",sans-serif;background:#a9deda;color:var(--ink)}button{font:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent}button:focus-visible{outline:3px solid #ffcd43;outline-offset:3px}button:disabled{cursor:not-allowed;opacity:.53}[hidden]{display:none!important}
 .game{position:fixed;inset:0;width:100vw;height:100dvh;overflow:hidden;touch-action:none;background:#98c7bc}.viewport{position:absolute;inset:0;overflow:hidden;touch-action:none;cursor:grab}.viewport:active{cursor:grabbing}.map{position:absolute;top:0;left:0;transform-origin:top left;will-change:transform;touch-action:none}.sceneArt{display:block;width:100%;height:100%;object-fit:fill;pointer-events:none;user-select:none}.hotspots{position:absolute;inset:0;pointer-events:none}.mapTint{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 -80px 110px rgba(29,74,46,.07),inset 0 50px 60px rgba(22,66,50,.08)}
@@ -452,14 +452,38 @@
 .v123Neighborhood{position:absolute;inset:0;z-index:1;pointer-events:none}
 .v123Neighborhood svg{width:100%;height:100%;overflow:visible}
 .v123Site{position:absolute;z-index:12;transform:translate(-50%,-100%);border:1px solid #f8e4bd;border-radius:13px;background:#fffdf0e8;color:#345848;font:700 clamp(8px,1.2vw,13px) system-ui;padding:5px;box-shadow:0 2px 7px #2d4d3455;white-space:nowrap}
-</style><style id="v123-hud-hotfix">
+</style><style id="v125-ground-contact">
+/* Ground contact is the node's (left,top), not the character image center. */
+.lifeActor.player:after,.lifeActor.npc:after{z-index:0;top:-2px;width:29px;height:10px;background:radial-gradient(ellipse,rgba(20,48,29,.55),rgba(20,48,29,.13) 57%,transparent 78%)}
+.lifeActor.player>img,.lifeActor.npc button img{z-index:1;transform-origin:50% 100%}
+.lifeActor.walking>img{animation:lifeStep .32s ease-in-out infinite}
+/* Ground marker is only displayed when diagnostic mode is explicitly enabled. */
+body.v125-show-feet .lifeActor:before{content:"";position:absolute;left:-4px;top:-4px;width:8px;height:8px;border-radius:50%;background:#ffed2c;border:1px solid #c12;z-index:30;pointer-events:none}
+#v125GroundToggle{position:fixed;right:10px;bottom:calc(112px + env(safe-area-inset-bottom));z-index:999;border:1px solid #517b57;border-radius:12px;padding:7px 10px;background:#fffff4;color:#285438;font:600 12px system-ui;box-shadow:0 2px 9px #0002}
+@media(max-width:720px){#v125GroundToggle{bottom:calc(134px + env(safe-area-inset-bottom));font-size:11px;padding:6px}}
+</style><style id="v1252-path-inspection">
+/* Diagnostics only: path graph is visualized on top of the original map, never changes movement or save state. */
+#v125PathOverlay{position:absolute;inset:0;width:100%;height:100%;z-index:19;pointer-events:none;overflow:visible}
+#v125PathOverlay[hidden]{display:none!important}
+#v125PathOverlay line{stroke:#0e6fe9;stroke-width:.48;stroke-dasharray:1.2 1;opacity:.85}
+#v125PathOverlay circle{fill:#ffdf29;stroke:#174b9e;stroke-width:.28}
+#v125PathOverlay text{fill:#143a78;font-size:1.7px;font-weight:800;paint-order:stroke;stroke:#fff;stroke-width:.65}
+body:not(.v125-show-feet) #v125PathOverlay{display:none!important}
+body:not(.v125-show-feet) #v125GroundToggle{opacity:.82}
+body:has(#welcome:not([hidden])) #v125GroundToggle{display:none!important}
+</style><style id="v1253-life-ground-polish">
+/* Keep existing ground coordinates and art; enhance grounded motion only. */
+.lifeActor.player img{transform-origin:50% 100%;}
+.lifeActor.player[data-facing="left"] img{scale:-1 1;}
+.lifeActor.player.walking img{animation:v1253Footstep .28s ease-in-out infinite alternate;}
+@keyframes v1253Footstep{from{translate:0 0;rotate:-2deg}to{translate:0 0;rotate:2deg}}
+/* Diagnostic overlays are for desktop calibration, not mobile gameplay. */
 @media(max-width:720px){
-body:not(.v123-tasks-open) #questBar,body:not(.v123-tasks-open) #lifeQuest{display:none!important}
-body.v123-tasks-open #questBar{display:flex!important;max-height:90px;overflow:auto}
-body.v123-tasks-open #lifeQuest:not([hidden]){display:block!important;max-height:95px;overflow:auto}
-#v123HudToggle{position:fixed;left:12px;bottom:calc(78px + env(safe-area-inset-bottom));z-index:9999;border:2px solid white;background:#f6fff5;color:#23543b;border-radius:16px;padding:10px 14px;font:700 14px system-ui;box-shadow:0 4px 15px #1237;min-height:44px}
+ #v125GroundToggle{display:none!important}
+ body.v125-show-feet #v125PathOverlay{display:none!important}
 }
-@media(min-width:721px){#v123HudToggle{display:none}}
+/* Diagnostic button should never cover the welcome panel. */
+body:not(.v1253-playing) #v125GroundToggle{display:none!important}
 </style></head>
 <body>
 <main class="game" id="game">
@@ -1346,6 +1370,7 @@ $('splashBackup').addEventListener('click',open);$('backupDownload').addEventLis
   [92.0,38.0]  // 22 new neighborhood school
  ];
  const edges=[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,9],[9,10],[0,11],[11,12],[12,13],[13,14],[5,15],[15,8],[10,16],[16,17],[17,18],[18,19],[19,20],[20,21],[21,22],[19,22]];
+ window.__greenCityWalkGraph=Object.freeze({nodes:nodes.map(p=>p.slice()),edges:edges.map(e=>e.slice())});
  const people=[
   {id:'grandma',node:1,sprite:'resident_elder',name:'美玲阿嬤'},
   {id:'student',node:14,sprite:'resident_school',name:'小晴'},
@@ -1384,8 +1409,12 @@ $('splashBackup').addEventListener('click',open);$('backupDownload').addEventLis
  for(const item of newSites){const b=document.createElement('button');b.type='button';b.className='v123Site';b.style.left=nodes[item.node][0]+'%';b.style.top=nodes[item.node][1]+'%';b.textContent=item.label;b.addEventListener('click',e=>{e.stopPropagation();if(active)walkTo(item.node,()=>show(item.title,item.desc,[{text:'繼續探索'}]));});layer.append(b);}
  const tap=document.createElement('div');tap.className='lifeTap';tap.setAttribute('aria-hidden','true');layer.append(tap);
  const avatar=document.createElement('div');avatar.className='lifeActor player';avatar.innerHTML=`<img src="${spriteSrc('gardener_walk')}" alt=""><span class="lifeActorRing">你</span>`;layer.append(avatar);
+ // V12.5.4: all life actors use the same feet-based depth rule.
+ // This fixes a concrete stacking bug: NPCs previously stayed at z-index 23,
+ // while the player used 20+groundY and therefore always covered them.
+ function lifeDepth(groundY){return 20+Math.round(Math.max(0,Math.min(100,Number(groundY)||0))*10);}
  const npcNodes=new Map();
- for(const p of people){const pt=nodes[p.node], el=document.createElement('div');el.className='lifeActor npc';el.style.left=pt[0]+'%';el.style.top=pt[1]+'%';el.innerHTML=`<button type="button" aria-label="和路人交談"><img src="${spriteSrc(p.sprite)}" alt=""></button>`;
+ for(const p of people){const pt=nodes[p.node], el=document.createElement('div');el.className='lifeActor npc';el.style.left=pt[0]+'%';el.style.top=pt[1]+'%';el.style.zIndex=String(lifeDepth(pt[1]));el.innerHTML=`<button type="button" aria-label="和路人交談"><img src="${spriteSrc(p.sprite)}" alt=""></button>`;
    el.querySelector('button').addEventListener('click',e=>{e.stopPropagation();if(active)walkTo(p.node,()=>talkTo(p.id));});layer.append(el);npcNodes.set(p.id,el);
  }
  const garden=document.createElement('button');garden.type='button';garden.className='lifeGarden';garden.style.left='42.6%';garden.style.top='65.1%';garden.innerHTML='🪴<small>阿嬤的盆栽</small>';garden.setAttribute('aria-label','走去照顧阿嬤的盆栽');garden.addEventListener('click',e=>{e.stopPropagation();if(active)walkTo(2,interactGarden)});layer.append(garden);
@@ -1397,7 +1426,18 @@ $('splashBackup').addEventListener('click',open);$('backupDownload').addEventLis
  const notebook=document.createElement('button');notebook.type='button';notebook.className='lifeNotebook';notebook.textContent='📖 園丁手札';notebook.setAttribute('aria-label','查看生活任務與事件');
  notebook.addEventListener('click',()=>{if(active)showNotebook()});game.append(notebook);
 
- function position(){avatar.style.left=current[0]+'%';avatar.style.top=current[1]+'%';if(active)bridge.followLife(current[0],current[1]);}
+ function position(){
+  const previousX=Number(avatar.dataset.lastX);
+  avatar.style.left=current[0]+'%';avatar.style.top=current[1]+'%';
+  // A ground anchor follows the walk graph. Front/back ordering tracks the feet,
+  // not the sprite's top edge. Do not modify stored game coordinates.
+  avatar.style.zIndex=String(lifeDepth(current[1]));
+  if(Number.isFinite(previousX)&&Math.abs(current[0]-previousX)>.035){
+    avatar.dataset.facing=current[0]>previousX?'right':'left';
+  }
+  avatar.dataset.lastX=String(current[0]);
+  if(active)bridge.followLife(current[0],current[1]);
+ }
  function persist(){state={...state,x:current[0],y:current[1]};bridge.setLife(state);}
  function hint(){
   const steps=[
@@ -1515,36 +1555,46 @@ $('splashBackup').addEventListener('click',open);$('backupDownload').addEventLis
  window.__lifeQA={enable:()=>setActive(true),disable:()=>setActive(false),get:()=>({...state}),go:node=>walkTo(node),talkTo,interactGarden,inspectSchool,inspectStorm,showNotebook,active:()=>active,walking:()=>walking,pathfind,nodes};
 })();
 
-</script><button id="v123HudToggle" type="button" aria-pressed="false">📋 顯示任務</button>
-<script id="v123HudHotfix">
+</script><script id="v125-ground-diagnostic">
 (function(){
-var b=document.getElementById('v123HudToggle');
-if(!b)return;
-b.addEventListener('click',function(){
-var open=document.body.classList.toggle('v123-tasks-open');
-b.textContent=open?'✕ 收起任務':'📋 顯示任務';
-b.setAttribute('aria-pressed',String(open));
-});
+  const button=document.createElement('button');
+  button.id='v125GroundToggle';button.type='button';button.textContent='👣 檢查腳下位置';
+  button.setAttribute('aria-pressed','false');
+  button.addEventListener('click',function(){
+    const enabled=document.body.classList.toggle('v125-show-feet');
+    button.textContent=enabled?'✓ 關閉腳下標記':'👣 檢查腳下位置';
+    button.setAttribute('aria-pressed',String(enabled));
+  });
+  document.body.appendChild(button);
 })();
-</script><style id="v123-splash-hud-fix">
-@media(max-width:720px){body:has(#splash:not([hidden])) #v123HudToggle{display:none!important}}
-</style>
-<script id="v123-splash-start-fallback">
+</script><script id="v1252-path-inspection-script">
 (function(){
-'use strict';
-var start=document.getElementById('startBtn');
-var splash=document.getElementById('splash');
-var task=document.getElementById('v123HudToggle');
-if(!start||!splash)return;
-// If the main game initialized correctly, its own click handler runs; this is a safe fallback.
-start.addEventListener('click',function(){
- splash.hidden=true;
- if(task)task.style.display='';
-});
-if(task){
- function refresh(){task.style.visibility=splash.hidden?'visible':'hidden';}
- refresh();
- new MutationObserver(refresh).observe(splash,{attributes:true,attributeFilter:['hidden']});
-}
+  // The node/edge graph is read from the existing source of truth, not duplicated here.
+  // If the original game's graph changes, this diagnostic reports the missing data instead of guessing.
+  const toggle=document.getElementById('v125GroundToggle');
+  const layer=document.getElementById('lifeLayer');
+  if(!toggle||!layer)return;
+  let svg=null;
+  const make=(tag,attrs)=>{const el=document.createElementNS('http://www.w3.org/2000/svg',tag);for(const [k,v] of Object.entries(attrs))el.setAttribute(k,String(v));return el;};
+  function draw(){
+    if(svg)return;
+    // The walk graph is intentionally exposed only through a read-only inspection hook.
+    const graph=window.__greenCityWalkGraph;
+    if(!graph||!Array.isArray(graph.nodes)||!Array.isArray(graph.edges))return;
+    svg=make('svg',{id:'v125PathOverlay',viewBox:'0 0 100 100',preserveAspectRatio:'none','aria-hidden':'true'});
+    for(const [a,b] of graph.edges){if(!graph.nodes[a]||!graph.nodes[b])continue;
+      svg.append(make('line',{x1:graph.nodes[a][0],y1:graph.nodes[a][1],x2:graph.nodes[b][0],y2:graph.nodes[b][1]}));}
+    graph.nodes.forEach(([x,y],i)=>{svg.append(make('circle',{cx:x,cy:y,r:'.7'}));const t=make('text',{x:x+1,y:y-1});t.textContent=i;svg.append(t)});
+    layer.append(svg);
+  }
+  toggle.addEventListener('click',()=>{if(document.body.classList.contains('v125-show-feet'))draw()});
+})();
+</script><script id="v1253-ground-mode-state">
+(function(){
+ const button=document.getElementById('lifeModeToggle');
+ if(!button)return;
+ const update=()=>document.body.classList.toggle('v1253-playing',button.getAttribute('aria-pressed')==='true');
+ button.addEventListener('click',()=>setTimeout(update,0));
+ update();
 })();
 </script></body></html>
